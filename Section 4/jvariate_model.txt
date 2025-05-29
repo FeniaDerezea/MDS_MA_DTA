@@ -1,0 +1,30 @@
+model{
+
+     for(i in 1:nrows){
+        
+         x[i] ~ dbin(S[study[i],state[i]],N[i])
+     }
+     for (i in 1:ns) {
+         for (j in 1:J){
+             logit(S[i,j]) <- delta[i,j]
+         }
+     
+         delta[i,1:J] ~ dmnorm(theta[1:J],Prec[1:J,1:J])
+       
+     }
+     
+#Priors
+for (r in 1:J){
+   theta[r] ~ dlogis(0,1)
+}    
+
+Prec[1:J,1:J] ~ dwish(R[,],J)
+tau[1:J,1:J] <- inverse(Prec[1:J,1:J])
+
+ 
+### Summary probabilities of a positive test ###########
+for (r in 1:J){
+probp[r] <- exp(theta[r])/(1+exp(theta[r]))
+}
+
+}
