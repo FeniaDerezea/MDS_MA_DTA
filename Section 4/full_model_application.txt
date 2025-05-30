@@ -1,0 +1,52 @@
+model{
+     # subgroup data
+     for(i in 1:nrows){
+        
+         x[i] ~ dbin(S[studyc[i],state[i]],N[i])
+         
+     }
+     # overlapping very early/early group data
+     for (i in 1:n0a){
+         x0a[i] ~ dbin(S0a[i],N0a[i])
+         S0a[i] <- p0[i]*S[study0ac[i],2]+(1-p0[i])*S[study0ac[i],3]
+          p0[i] ~ dunif(0,1)
+
+     }
+     # overall type 1 data
+     for (i in 1:nall1){
+         xall1[i] ~ dbin(Sall1[i],Nall1[i])
+         Sall1[i] <- inprod(p[i,1:(J-1)],S[studyall1c[i],2:J])
+     }
+     # overall type 2 data
+     for (i in 1:nall2){
+          xall2[i] ~ dbin(Sall2[i],Nall2[i])
+          Sall2[i] <- p0a[i]*S0a2[i]+(1-p0a[i])*S[studyall2c[i],4] 
+          S0a2[i]<-p02[i]*S[studyall2c[i],2]+(1-p02[i])*S[studyall2c[i],3]
+          p02[i] ~ dunif(0,1)
+
+     }
+     # random effects
+     for (i in 1:ns) {
+         for (j in 1:J){
+             logit(S[i,j]) <- delta[i,j]
+         }
+     
+         delta[i,1:J] ~ dmnorm(theta[1:J],Prec[1:J,1:J])
+       
+     }
+     
+#Priors
+for (r in 1:J){
+   theta[r] ~ dlogis(0,1)
+}    
+
+Prec[1:J,1:J] ~ dwish(R[,],J)
+tau[1:J,1:J] <- inverse(Prec[1:J,1:J])
+
+ 
+### Summary probabilities of a positive test ###########
+for (r in 1:J){
+probp[r] <- exp(theta[r])/(1+exp(theta[r]))
+}
+
+}
