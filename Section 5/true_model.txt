@@ -1,0 +1,77 @@
+model{
+
+
+for(i in 1:nrow){
+	
+
+                n[i,1] <- N[i] 
+		p[i,1] <- pr[i,1] 
+
+		for(t in 2:Tc[i]){       
+			n[i,t] <- x[i,t-1]  		
+			p[i,t] <-  pr[i,t] / pr[i,t-1]	 
+			}    
+	
+
+	         for(t in 1:Tc[i]){
+			x[i,t] ~ dbin(p[i,t], n[i,t])  
+
+                        #bc[i,t] <- (( pow(C[i,t], lambda) - 1 ) / lambda )*(1 - equals(lambda, 0)) 
+			 #+  log(C[i,t])*equals(lambda, 0)  	# Box-Cox transformation
+                        bc[i,t] <-log(C[i,t])
+	                           
+			d[i,t] <- (mu[Studyc[i],State[i]] - bc[i,t] ) / s[Studyc[i],State[i]] 
+			logit(pr[i,t]) <- min(10, max(-10, d[i,t]) )  
+
+                        xhat[i,t] <- p[i,t]*n[i,t]  		# Fitted values
+
+                       dev[i,t] <- 2*(x[i,t]*(log(x[i,t]) - log(xhat[i,t])) + (n[i,t] - x[i,t])*(log(n[i,t] - x[i,t])     
+                                  - log(n[i,t] - xhat[i,t])))  # Residual deviance contribution
+                        }
+
+rd[i] <- sum(dev[i,1:Tc[i]]) 	# Residual deviance study i
+		
+}
+
+
+
+
+for (i in 1:ns){
+
+for (j in 1:J){
+s[i,j]<-exp(logs[i,j])
+logs[i,j] <- mu[i,J+j]
+
+}
+mu[i,1:(2*J)] ~ dmnorm(mean[1:(2*J)],Prec[1:(2*J),1:(2*J)])
+}
+
+
+# Priors:
+#lambda ~ dunif(-3,3) # comment this out if log-link used
+
+Prec[1:(2*J),1:(2*J)] ~ dwish(R[,],(2*J))
+ tau[1:(2*J),1:(2*J)] <- inverse(Prec[1:(2*J),1:(2*J)])
+
+        for(r in 1:(2*J)){
+	mean[r] ~ dnorm(0, 0.01)
+        
+	}	
+
+resdev <- sum(rd[]) # Total residual deviance
+
+#probs at thres 10 and 100
+S010 <- (mean[2]-log(10))/exp(mean[6])
+Sa10 <- (mean[3]-log(10))/exp(mean[7])
+Sbcd10 <- (mean[4]-log(10))/exp(mean[8])
+FPF10 <- (mean[1]-log(10))/exp(mean[5])
+
+S0100 <- (mean[2]-log(100))/exp(mean[6])
+Sa100 <- (mean[3]-log(100))/exp(mean[7])
+Sbcd100 <- (mean[4]-log(100))/exp(mean[8])
+FPF100 <- (mean[1]-log(100))/exp(mean[5])
+
+
+
+
+}
