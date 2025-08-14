@@ -1,0 +1,51 @@
+model{
+
+
+for(i in 1:nsub){
+	
+
+                n[i,1] <- N[i] 
+		p[i,1] <- pr[i,1] 
+
+		for(t in 2:Tc[i]){       
+			n[i,t] <- x[i,t-1]  		
+			p[i,t] <-  pr[i,t] / pr[i,t-1]	 
+			}    
+	
+
+	         for(t in 1:Tc[i]){
+			x[i,t] ~ dbin(p[i,t], n[i,t])
+
+                         #bc[i,t] <- (( pow(C[i,t], lambda) - 1 ) / lambda )*(1 - equals(lambda, 0)) 
+			 #+  log(C[i,t])*equals(lambda, 0)  	# Box-Cox transformation
+                         bc[i,t] <-log(C[i,t]) #comment out if box-cox used
+
+  	                           
+			d[i,t] <- (mu[i,1] - bc[i,t] ) / exp(mu[i,2]) 
+			logit(pr[i,t]) <- min(10, max(-10, d[i,t]) )  
+
+                        xhat[i,t] <- p[i,t]*n[i,t]  		# Fitted values
+
+                       dev[i,t] <- 2*(x[i,t]*(log(x[i,t]) - log(xhat[i,t])) + (n[i,t] - x[i,t])*(log(n[i,t] - x[i,t])     
+                                  - log(n[i,t] - xhat[i,t])))  # Residual deviance contribution
+                        }
+
+rd[i] <- sum(dev[i,1:Tc[i]]) 	# Residual deviance study i
+		
+
+
+mu[i,1:2] ~ dmnorm(mean[1:2],Prec[1:2,1:2])
+}
+# Priors:
+#lambda ~ dunif(-3,3) # comment this out if log-link used
+
+mean[1] ~ dnorm(0, 0.01)
+mean[2] ~ dnorm(0, 0.01)
+Prec[1:2,1:2] ~ dwish(R[,],2)
+tau[1:2,1:2] <- inverse(Prec[1:2,1:2])
+
+#probs at thresholds 10 and 100 
+S010 <- (mean[1]-log(10))/exp(mean[2])
+S0100 <- (mean[1]-log(100))/exp(mean[2])
+
+}
