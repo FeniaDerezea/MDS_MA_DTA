@@ -52,9 +52,9 @@ Prec3=riwish(4, R2)
 
 inits1<-list(  
   #list(theta=c(1,1,1),  sds=0.1,p=c(0.4,0.3,0.3))
-  list(mean=c(1,1.1,1.2,1.3),  Prec=Prec ,ms=c(0.6,0.6,0.65,0.67),sds=c(0.4,0.4,0.4,0.4),lambda=-0.8),
-  list(mean=c(0.6,0.6,0.66,0.67),  Prec=Prec2 ,ms=c(0.7,0.7,0.75,0.77),sds=c(0.5,0.5,0.5,0.5),lambda=-0.5),
-  list(mean=c(1.6,1.6,1.65,1.67),  Prec=Prec3,ms=c(0.8,0.8,0.85,0.87),sds=c(0.55,0.55,0.55,0.55),lambda=-0.3)
+  list(mean=c(0.85,0.9,1,1.3),  Prec=Prec ,ms=c(0.6,0.6),sds=c(0.4,0.4),lambda=-0.8),
+  list(mean=c(0.3,0.5,0.6,0.67),  Prec=Prec2 ,ms=c(0.7,0.7),sds=c(0.5,0.5),lambda=-0.5),
+  list(mean=c(0.8,1,1.5,1.67),  Prec=Prec3,ms=c(0.8,0.8),sds=c(0.55,0.55),lambda=-0.3)
 )
 #parameters to monitor
 mymonitoredparamslist <- c( "mean","ms","tau","resdev","lambda")
@@ -71,4 +71,5 @@ fitv6 <- jags(
   n.burnin =  n.burnin,        
   n.thin = n.thin,                                          
   progress.bar = "text")  
+
 
